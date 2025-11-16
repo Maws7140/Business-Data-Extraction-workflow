@@ -31,6 +31,30 @@ A Python automation tool for extracting and filtering public business registrati
   - Configurable output limits
   - Detailed extraction summaries
 
+- **Web Interface** 🆕
+  - Interactive web UI built with Streamlit
+  - Drag-and-drop file upload
+  - Visual data analytics with charts
+  - Real-time filtering and preview
+  - One-click downloads in multiple formats
+  - No command line required!
+
+## Quick Start - Web UI
+
+The easiest way to use this tool is through the web interface:
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Launch web UI
+streamlit run app.py
+```
+
+Your browser will open automatically at `http://localhost:8501`
+
+See [WEB_UI_GUIDE.md](WEB_UI_GUIDE.md) for complete web UI documentation.
+
 ## Installation
 
 ### Prerequisites
@@ -59,7 +83,28 @@ cp .env.example .env
 
 ## Quick Start
 
-### Command Line Usage
+### Web Interface (Recommended for Beginners)
+
+**Launch the web UI:**
+```bash
+# Linux/macOS
+./run_web_ui.sh
+
+# Windows
+run_web_ui.bat
+
+# Or directly
+streamlit run app.py
+```
+
+**Then:**
+1. Upload your CSV or ZIP file
+2. Configure filters in the sidebar
+3. Preview and download results
+
+See [WEB_UI_GUIDE.md](WEB_UI_GUIDE.md) for detailed instructions.
+
+### Command Line Usage (Advanced)
 
 Extract data from a local CSV file:
 ```bash
