@@ -1,0 +1,58 @@
+# Filter configuration for business entity data extraction
+# Customize these filters based on your requirements
+
+filters:
+  # Entity type filters (e.g., LLC, Corporation, LP)
+  entity_types:
+    enabled: true
+    values:
+      - "DOMESTIC STOCK"
+      - "DOMESTIC LIMITED LIABILITY COMPANY"
+      - "FOREIGN LIMITED LIABILITY COMPANY"
+      - "DOMESTIC LIMITED PARTNERSHIP"
+
+  # Status filters (Active, Suspended, etc.)
+  status:
+    enabled: true
+    values:
+      - "ACTIVE"
+
+  # Registration date range
+  registration_date:
+    enabled: false
+    start_date: "2020-01-01"
+    end_date: "2025-12-31"
+
+  # Geographic filters (by city, county, zip)
+  location:
+    enabled: false
+    cities:
+      - "San Francisco"
+      - "Los Angeles"
+      - "San Diego"
+    counties: []
+    zip_codes: []
+
+  # Business name patterns (regex supported)
+  name_patterns:
+    enabled: false
+    patterns:
+      - ".*Tech.*"
+      - ".*Solutions.*"
+
+  # Agent filters
+  agent:
+    enabled: false
+    agent_names: []
+
+  # Custom field filters
+  custom_filters:
+    enabled: false
+    # Add custom field:value pairs
+    # field_name: ["value1", "value2"]
+
+# Output configuration
+output:
+  format: "csv"  # Options: csv, json, excel
+  include_metadata: true
+  max_records: null  # null for no limit, or specify a number
