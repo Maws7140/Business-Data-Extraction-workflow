@@ -307,38 +307,66 @@ class CAScraper:
         """
         Scrape available bulk data download links from CA SOS
 
+        Note: As of 2024, CA SOS bulk data is now accessed through the bizfile Online portal
+        at https://bizfileonline.sos.ca.gov/ which requires authentication. This method
+        attempts to discover any publicly available download links.
+
+        For authenticated bulk data access:
+        1. Create an account at https://bizfileonline.sos.ca.gov/
+        2. Log in and navigate to the "BE & UCC Bulk Orders" link
+        3. Order and download bulk data files
+
         Returns:
             List of dictionaries with download information
         """
         self.logger.info("Scraping bulk data download links...")
+        self.logger.warning(
+            "Note: CA SOS bulk data now requires authentication via bizfile Online portal. "
+            "Public downloads may be limited or unavailable."
+        )
 
-        bulk_data_url = "https://www.sos.ca.gov/business-programs/business-entities/download-data"
+        # Try multiple potential URLs for bulk data
+        potential_urls = [
+            "https://bizfileonline.sos.ca.gov/data-requests",
+            "https://www.sos.ca.gov/business-programs/business-entities",
+            "https://www.sos.ca.gov/administration/public-records-act-requests/business-entity-records"
+        ]
 
         downloads = []
 
-        try:
-            html = self.fetch_page(bulk_data_url)
+        for bulk_data_url in potential_urls:
+            try:
+                self.logger.info(f"Checking {bulk_data_url} for download links...")
+                html = self.fetch_page(bulk_data_url, use_selenium=True)
 
-            if html:
-                soup = BeautifulSoup(html, 'lxml')
+                if html:
+                    soup = BeautifulSoup(html, 'lxml')
 
-                # Find download links (adjust selectors based on actual page)
-                links = soup.find_all('a', href=re.compile(r'\.(zip|csv|txt)$', re.I))
+                    # Find download links (adjust selectors based on actual page)
+                    links = soup.find_all('a', href=re.compile(r'\.(zip|csv|txt|xlsx)$', re.I))
 
-                for link in links:
-                    href = link.get('href')
-                    if href:
-                        download_info = {
-                            'url': urljoin(bulk_data_url, href),
-                            'title': link.get_text(strip=True),
-                            'filename': Path(urlparse(href).path).name,
-                            'found_at': datetime.now().isoformat()
-                        }
-                        downloads.append(download_info)
-                        self.logger.info(f"Found download: {download_info['title']}")
+                    for link in links:
+                        href = link.get('href')
+                        if href:
+                            download_info = {
+                                'url': urljoin(bulk_data_url, href),
+                                'title': link.get_text(strip=True),
+                                'filename': Path(urlparse(href).path).name,
+                                'source_page': bulk_data_url,
+                                'found_at': datetime.now().isoformat()
+                            }
+                            downloads.append(download_info)
+                            self.logger.info(f"Found download: {download_info['title']}")
 
-        except Exception as e:
-            self.logger.error(f"Error scraping bulk data links: {e}")
+            except Exception as e:
+                self.logger.warning(f"Error checking {bulk_data_url}: {e}")
+                continue
+
+        if not downloads:
+            self.logger.warning(
+                "No public download links found. Bulk data access likely requires "
+                "authentication at https://bizfileonline.sos.ca.gov/"
+            )
 
         return downloads
 

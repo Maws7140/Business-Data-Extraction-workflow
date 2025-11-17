@@ -285,12 +285,15 @@ LOG_FILE=./logs/extraction.log
 
 ### California Secretary of State
 
-The California SOS provides business entity data through their BizFile portal:
+The California SOS provides business entity data through their BizFile Online portal:
 
-**Bulk Data Access:**
-- Visit: https://www.sos.ca.gov/business-programs/bizfile
-- Navigate to "BE & UCC Bulk Orders"
-- Download bulk data files (ZIP/CSV format)
+**Bulk Data Access (Updated 2024):**
+1. Create an account at https://bizfileonline.sos.ca.gov/
+2. Log in to your account
+3. Navigate to "BE & UCC Bulk Orders" in the Information & Resources section
+4. Order and download bulk data files (ZIP/CSV format)
+
+**Important:** As of 2024, bulk data downloads require authentication and cannot be accessed publicly. The `--discover-bulk` feature will attempt to find any publicly available download links, but most bulk data now requires a registered account.
 
 **Data Types Available:**
 - Business Entities (Corporations, LLCs, LPs)
@@ -299,7 +302,12 @@ The California SOS provides business entity data through their BizFile portal:
 - Entity status
 - Agent information
 
-**Note:** The California SOS does not provide a public API. This tool is designed to work with bulk data files downloaded from their portal.
+**Alternative Options:**
+- Use the web scraping feature to search and extract specific business records
+- Contact bizfile@sos.ca.gov for questions about bulk data access
+- Visit https://bizfileonline.sos.ca.gov/data-requests for data request information
+
+**Note:** The California SOS does not provide a public API. This tool is designed to work with bulk data files downloaded from their portal or through web scraping individual records.
 
 ## Project Structure
 
