@@ -16,6 +16,13 @@ from .filters import DataFilter
 from .validator import DataValidator
 from .scraper import BusinessDataScraper
 
+# Import LLM scraper if available
+try:
+    from .llm_scraper import BusinessLLMScraper
+    LLM_SCRAPER_AVAILABLE = True
+except ImportError:
+    LLM_SCRAPER_AVAILABLE = False
+
 
 def setup_logging(log_level: str = "INFO", log_file: Optional[str] = None):
     """
@@ -95,7 +102,12 @@ Examples:
     input_group.add_argument(
         '--scrape',
         action='store_true',
-        help='Scrape data from CA SOS website'
+        help='Scrape data from CA SOS website (uses Selenium)'
+    )
+    input_group.add_argument(
+        '--llm-scrape',
+        action='store_true',
+        help='Scrape data using LLM-based scraper (requires ANTHROPIC_API_KEY)'
     )
     input_group.add_argument(
         '--discover-bulk',
@@ -184,6 +196,17 @@ Examples:
         action='store_true',
         help='Download discovered bulk data files (use with --discover-bulk)'
     )
+    parser.add_argument(
+        '--scrape-urls',
+        type=str,
+        nargs='+',
+        help='URLs to scrape with LLM scraper (space-separated list)'
+    )
+    parser.add_argument(
+        '--use-llm-scraper',
+        action='store_true',
+        help='Use LLM-based scraper instead of Selenium for --discover-bulk'
+    )
 
     # Logging
     parser.add_argument(
@@ -222,12 +245,24 @@ Examples:
         # Handle special scraping modes
         if args.discover_bulk:
             logger.info("\n[Discover Mode] Finding bulk data downloads...")
-            scraper = BusinessDataScraper(output_dir=args.output_dir)
+
+            if args.use_llm_scraper or LLM_SCRAPER_AVAILABLE:
+                if not LLM_SCRAPER_AVAILABLE:
+                    logger.error("LLM scraper not available. Install with: pip install anthropic")
+                    sys.exit(1)
+
+                logger.info("Using LLM-based scraper...")
+                scraper = BusinessLLMScraper(output_dir=args.output_dir)
+            else:
+                logger.info("Using Selenium scraper...")
+                scraper = BusinessDataScraper(output_dir=args.output_dir)
 
             try:
                 downloads = scraper.discover_bulk_downloads(
                     download_all=args.download_bulk_data,
                     output_dir=Path(args.output_dir) / "bulk_downloads"
+                ) if not args.use_llm_scraper else scraper.discover_bulk_downloads(
+                    url="https://www.sos.ca.gov/business-programs/business-entities"
                 )
 
                 print("\n" + "=" * 70)
@@ -235,7 +270,7 @@ Examples:
                 print("=" * 70)
 
                 for i, download in enumerate(downloads, 1):
-                    print(f"\n{i}. {download['title']}")
+                    print(f"\n{i}. {download.get('title', download.get('text', 'Unknown'))}")
                     print(f"   URL: {download['url']}")
                     print(f"   Filename: {download['filename']}")
                     if download.get('downloaded'):
@@ -251,7 +286,42 @@ Examples:
         # Step 1: Load data
         logger.info("\n[Step 1/4] Loading data...")
 
-        if args.scrape:
+        if args.llm_scrape:
+            # LLM-based scraping
+            if not LLM_SCRAPER_AVAILABLE:
+                logger.error("LLM scraper not available. Install with: pip install anthropic")
+                logger.error("Or use --scrape for Selenium-based scraping")
+                sys.exit(1)
+
+            logger.info("Scraping data using LLM-based scraper...")
+
+            if not os.getenv('ANTHROPIC_API_KEY'):
+                logger.error("ANTHROPIC_API_KEY environment variable not set")
+                logger.error("Set it with: export ANTHROPIC_API_KEY='your-api-key'")
+                sys.exit(1)
+
+            scraper = BusinessLLMScraper(output_dir=args.output_dir)
+
+            try:
+                # Check if URLs are provided
+                if args.scrape_urls:
+                    logger.info(f"Scraping {len(args.scrape_urls)} URLs...")
+                    df, scraped_path = scraper.scrape_and_save(args.scrape_urls)
+                else:
+                    logger.error("No URLs provided for LLM scraping")
+                    logger.error("Use --scrape-urls URL1 URL2 ...")
+                    sys.exit(1)
+
+                if df.empty:
+                    logger.warning("No data scraped. Exiting.")
+                    sys.exit(0)
+
+                logger.info(f"Scraped {len(df)} records")
+
+            finally:
+                scraper.close()
+
+        elif args.scrape:
             # Scrape data from CA SOS website
             logger.info("Scraping data from CA SOS website...")
 

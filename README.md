@@ -5,11 +5,15 @@ A Python automation tool for extracting and filtering public business registrati
 ## Features
 
 - **Web Scraping** 🆕
-  - Scrape business data from CA SOS website
-  - Search by business name or entity number
-  - Automatic bulk data discovery
-  - Rate limiting and retry logic
-  - Selenium-based for JavaScript pages
+  - **LLM-Based Scraper** (Recommended) - Intelligent scraping powered by Claude AI
+    - No brittle CSS selectors - understands content semantically
+    - Adapts automatically to website changes
+    - Works like Firecrawl with full control
+    - Custom extraction schemas
+  - **Selenium Scraper** (Legacy) - Traditional browser automation
+    - Search by business name or entity number
+    - Automatic bulk data discovery
+    - Rate limiting and retry logic
 
 - **Data Extraction**
   - Download bulk data from URLs
@@ -113,7 +117,46 @@ See [WEB_UI_GUIDE.md](WEB_UI_GUIDE.md) for detailed instructions.
 
 ### Web Scraping (New!)
 
-Scrape business data directly from the CA SOS website:
+#### LLM-Based Scraper (Recommended)
+
+Intelligent scraping powered by Claude AI - no brittle selectors, adapts to any website structure:
+
+**Setup:**
+```bash
+# Get API key from https://console.anthropic.com/
+export ANTHROPIC_API_KEY='your-api-key'
+
+# Install dependencies (includes anthropic package)
+pip install -r requirements.txt
+```
+
+**Scrape specific URLs:**
+```bash
+python -m src.cli --llm-scrape --scrape-urls https://example.com/business1 https://example.com/business2 --output results
+```
+
+**Discover bulk downloads:**
+```bash
+python -m src.cli --discover-bulk --use-llm-scraper
+```
+
+**Python API:**
+```python
+from src.llm_scraper import BusinessLLMScraper
+
+scraper = BusinessLLMScraper()
+
+# Scrape multiple business pages
+urls = ['https://example.com/biz1', 'https://example.com/biz2']
+df, output_path = scraper.scrape_and_save(urls)
+
+print(f"Scraped {len(df)} businesses to {output_path}")
+scraper.close()
+```
+
+See [LLM_SCRAPER_GUIDE.md](LLM_SCRAPER_GUIDE.md) for complete documentation.
+
+#### Traditional Selenium Scraper (Legacy)
 
 **Scrape by business name:**
 ```bash
@@ -130,7 +173,7 @@ python -m src.cli --discover-bulk --download-bulk-data
 python -m src.cli --scrape --scrape-config config/scraper.yaml --output results
 ```
 
-See [SCRAPER_GUIDE.md](SCRAPER_GUIDE.md) for complete scraping documentation.
+See [SCRAPER_GUIDE.md](SCRAPER_GUIDE.md) for Selenium scraper documentation.
 
 ### Command Line Usage (Advanced)
 
@@ -236,6 +279,9 @@ output:
 ### Environment Variables (.env)
 
 ```bash
+# LLM Scraper (Required for LLM-based scraping)
+ANTHROPIC_API_KEY=your-anthropic-api-key
+
 # Data directories
 DATA_INPUT_DIR=./input
 DATA_OUTPUT_DIR=./output
@@ -319,18 +365,22 @@ Business-Data-Extraction-workflow/
 │   ├── extractor.py        # Data extraction module
 │   ├── filters.py          # Data filtering module
 │   ├── validator.py        # Data validation module
-│   └── scraper.py          # Web scraping module 🆕
+│   ├── scraper.py          # Selenium web scraper
+│   └── llm_scraper.py      # LLM-based scraper 🆕
 ├── config/
 │   ├── filters.yaml        # Filter configuration
-│   └── scraper.yaml        # Scraper configuration 🆕
+│   └── scraper.yaml        # Scraper configuration
 ├── input/                  # Input data directory
 ├── output/                 # Output data directory
-├── scraped_data/           # Scraped data directory 🆕
+├── scraped_data/           # Scraped data directory
 ├── logs/                   # Log files
 ├── app.py                  # Streamlit web UI
 ├── example.py              # Usage examples
+├── example_llm_scraper.py  # LLM scraper examples 🆕
+├── test_llm_scraper.py     # LLM scraper tests 🆕
 ├── requirements.txt        # Python dependencies
-├── SCRAPER_GUIDE.md        # Scraper documentation 🆕
+├── LLM_SCRAPER_GUIDE.md    # LLM scraper documentation 🆕
+├── SCRAPER_GUIDE.md        # Selenium scraper documentation
 ├── .env.example           # Environment template
 └── README.md              # This file
 ```
@@ -477,6 +527,14 @@ For support with:
 
 ## Version History
 
+### v1.1.0 (LLM Scraper) 🆕
+- **LLM-based web scraper** powered by Claude AI
+- Intelligent semantic data extraction
+- No brittle CSS selectors needed
+- Custom extraction schemas
+- Robust to website changes
+- Python API and CLI support
+
 ### v1.0.0 (Initial Release)
 - Data extraction from CSV/ZIP files
 - Bulk data download support
@@ -485,3 +543,5 @@ For support with:
 - Multiple output formats
 - Command-line interface
 - Programmatic API
+- Selenium-based web scraper
+- Interactive web UI with Streamlit
