@@ -11,9 +11,10 @@ from typing import Optional
 import yaml
 from dotenv import load_dotenv
 
-from extractor import DataExtractor
-from filters import DataFilter
-from validator import DataValidator
+from .extractor import DataExtractor
+from .filters import DataFilter
+from .validator import DataValidator
+from .scraper import BusinessDataScraper
 
 
 def setup_logging(log_level: str = "INFO", log_file: Optional[str] = None):
@@ -91,6 +92,16 @@ Examples:
         type=str,
         help='URL to download bulk data'
     )
+    input_group.add_argument(
+        '--scrape',
+        action='store_true',
+        help='Scrape data from CA SOS website'
+    )
+    input_group.add_argument(
+        '--discover-bulk',
+        action='store_true',
+        help='Discover and list bulk data download links'
+    )
 
     # Configuration
     parser.add_argument(
@@ -144,6 +155,36 @@ Examples:
         help='File encoding (default: utf-8)'
     )
 
+    # Scraper options
+    parser.add_argument(
+        '--business-names',
+        type=str,
+        nargs='+',
+        help='Business names to scrape (space-separated list)'
+    )
+    parser.add_argument(
+        '--entity-numbers',
+        type=str,
+        nargs='+',
+        help='Entity numbers to scrape (space-separated list)'
+    )
+    parser.add_argument(
+        '--scrape-config',
+        type=str,
+        help='Path to scraper configuration YAML file'
+    )
+    parser.add_argument(
+        '--max-scrape-results',
+        type=int,
+        default=100,
+        help='Maximum results per scrape search (default: 100)'
+    )
+    parser.add_argument(
+        '--download-bulk-data',
+        action='store_true',
+        help='Download discovered bulk data files (use with --discover-bulk)'
+    )
+
     # Logging
     parser.add_argument(
         '--log-level',
@@ -178,10 +219,75 @@ Examples:
             output_dir=args.output_dir
         )
 
+        # Handle special scraping modes
+        if args.discover_bulk:
+            logger.info("\n[Discover Mode] Finding bulk data downloads...")
+            scraper = BusinessDataScraper(output_dir=args.output_dir)
+
+            try:
+                downloads = scraper.discover_bulk_downloads(
+                    download_all=args.download_bulk_data,
+                    output_dir=Path(args.output_dir) / "bulk_downloads"
+                )
+
+                print("\n" + "=" * 70)
+                print("DISCOVERED BULK DATA DOWNLOADS")
+                print("=" * 70)
+
+                for i, download in enumerate(downloads, 1):
+                    print(f"\n{i}. {download['title']}")
+                    print(f"   URL: {download['url']}")
+                    print(f"   Filename: {download['filename']}")
+                    if download.get('downloaded'):
+                        print(f"   Downloaded to: {download['local_path']}")
+
+                print("\n" + "=" * 70)
+
+            finally:
+                scraper.close()
+
+            return
+
         # Step 1: Load data
         logger.info("\n[Step 1/4] Loading data...")
 
-        if args.download_url:
+        if args.scrape:
+            # Scrape data from CA SOS website
+            logger.info("Scraping data from CA SOS website...")
+
+            scraper = BusinessDataScraper(output_dir=args.output_dir)
+
+            try:
+                # Load scrape config if provided
+                if args.scrape_config:
+                    with open(args.scrape_config, 'r') as f:
+                        scrape_config = yaml.safe_load(f)
+                else:
+                    # Use CLI arguments
+                    scrape_config = {
+                        'business_names': args.business_names,
+                        'entity_numbers': args.entity_numbers,
+                        'max_results': args.max_scrape_results
+                    }
+
+                if not scrape_config.get('business_names') and not scrape_config.get('entity_numbers'):
+                    logger.error("No business names or entity numbers provided for scraping")
+                    logger.error("Use --business-names or --entity-numbers or --scrape-config")
+                    sys.exit(1)
+
+                # Scrape and save data
+                df, scraped_path = scraper.scrape_and_save(scrape_config)
+
+                if df.empty:
+                    logger.warning("No data scraped. Exiting.")
+                    sys.exit(0)
+
+                logger.info(f"Scraped {len(df)} records")
+
+            finally:
+                scraper.close()
+
+        elif args.download_url:
             # Download and extract
             downloaded_file = extractor.download_bulk_data(args.download_url)
 

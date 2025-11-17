@@ -1,0 +1,96 @@
+# Scraper Configuration
+# Configuration for web scraping CA Secretary of State business data
+
+# Business names to search for
+# You can use partial names or keywords
+business_names:
+  - "Tech Solutions"
+  - "Consulting Group"
+  - "Capital Partners"
+
+# Specific entity numbers to scrape
+# Leave empty if searching by name
+entity_numbers: []
+
+# Maximum results per search query
+max_results: 100
+
+# Scraper behavior settings
+scraper_settings:
+  # Run browser in headless mode (no GUI)
+  headless: true
+
+  # Rate limiting: minimum seconds between requests
+  # Increase this to be more respectful to the server
+  rate_limit: 2.0
+
+  # Request timeout in seconds
+  timeout: 30
+
+  # Maximum retry attempts for failed requests
+  max_retries: 3
+
+  # Wait time between retries (exponential backoff)
+  retry_delay: 2
+
+# Output settings
+output:
+  # Directory to save scraped data
+  output_dir: "./scraped_data"
+
+  # Output file format
+  format: "csv"  # Options: csv, json, excel
+
+  # Include timestamp in filename
+  include_timestamp: true
+
+# Optional: Search filters to apply during scraping
+# These work alongside the main filters.yaml for post-processing
+search_filters:
+  # Only scrape active businesses
+  active_only: true
+
+  # Entity types to focus on
+  entity_types:
+    - "DOMESTIC LIMITED LIABILITY COMPANY"
+    - "DOMESTIC STOCK"
+    - "FOREIGN LIMITED LIABILITY COMPANY"
+
+  # Geographic filters
+  locations:
+    cities:
+      - "San Francisco"
+      - "Los Angeles"
+      - "San Diego"
+
+    counties: []
+
+    zip_codes: []
+
+# Advanced options
+advanced:
+  # Use Selenium for JavaScript-heavy pages
+  use_selenium: true
+
+  # Save raw HTML pages for debugging
+  save_html: false
+
+  # Continue scraping even if some requests fail
+  ignore_errors: true
+
+  # Maximum total pages to scrape
+  max_pages: 10
+
+  # Custom user agent (leave empty for random rotation)
+  user_agent: ""
+
+# Logging
+logging:
+  # Log scraping activity
+  enabled: true
+
+  # Log level: DEBUG, INFO, WARNING, ERROR
+  level: "INFO"
+
+  # Save logs to file
+  log_file: "logs/scraper.log"
