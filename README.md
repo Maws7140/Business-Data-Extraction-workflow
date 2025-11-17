@@ -4,6 +4,13 @@ A Python automation tool for extracting and filtering public business registrati
 
 ## Features
 
+- **Web Scraping** 🆕
+  - Scrape business data from CA SOS website
+  - Search by business name or entity number
+  - Automatic bulk data discovery
+  - Rate limiting and retry logic
+  - Selenium-based for JavaScript pages
+
 - **Data Extraction**
   - Download bulk data from URLs
   - Process local CSV and ZIP files
@@ -103,6 +110,27 @@ streamlit run app.py
 3. Preview and download results
 
 See [WEB_UI_GUIDE.md](WEB_UI_GUIDE.md) for detailed instructions.
+
+### Web Scraping (New!)
+
+Scrape business data directly from the CA SOS website:
+
+**Scrape by business name:**
+```bash
+python -m src.cli --scrape --business-names "Tech Solutions" "Consulting" --output scraped_data
+```
+
+**Discover bulk data downloads:**
+```bash
+python -m src.cli --discover-bulk --download-bulk-data
+```
+
+**Use configuration file:**
+```bash
+python -m src.cli --scrape --scrape-config config/scraper.yaml --output results
+```
+
+See [SCRAPER_GUIDE.md](SCRAPER_GUIDE.md) for complete scraping documentation.
 
 ### Command Line Usage (Advanced)
 
@@ -282,14 +310,19 @@ Business-Data-Extraction-workflow/
 │   ├── cli.py              # Command-line interface
 │   ├── extractor.py        # Data extraction module
 │   ├── filters.py          # Data filtering module
-│   └── validator.py        # Data validation module
+│   ├── validator.py        # Data validation module
+│   └── scraper.py          # Web scraping module 🆕
 ├── config/
-│   └── filters.yaml        # Filter configuration
+│   ├── filters.yaml        # Filter configuration
+│   └── scraper.yaml        # Scraper configuration 🆕
 ├── input/                  # Input data directory
 ├── output/                 # Output data directory
+├── scraped_data/           # Scraped data directory 🆕
 ├── logs/                   # Log files
+├── app.py                  # Streamlit web UI
 ├── example.py              # Usage examples
 ├── requirements.txt        # Python dependencies
+├── SCRAPER_GUIDE.md        # Scraper documentation 🆕
 ├── .env.example           # Environment template
 └── README.md              # This file
 ```
