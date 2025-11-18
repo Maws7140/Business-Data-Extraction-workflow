@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firecrawl LLM Extraction</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Firecrawl LLM Extraction</h1>
+            <p class="subtitle">Extract structured data from any URL using AI</p>
+        </header>
+
+        <!-- Provider Selection -->
+        <section class="provider-section">
+            <h2>LLM Provider Configuration</h2>
+            <div class="provider-selector">
+                <div class="form-group">
+                    <label for="provider">Provider:</label>
+                    <select id="provider" onchange="updateProvider()">
+                        {% for p in providers %}
+                        <option value="{{ p }}" {% if p == current_provider %}selected{% endif %}>
+                            {{ p | title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="model">Model:</label>
+                    <input type="text" id="model" placeholder="Default model" value="{{ current_model or '' }}">
+                </div>
+                <button onclick="saveProviderConfig()" class="btn btn-secondary">Save Config</button>
+                <button onclick="testProvider()" class="btn btn-outline">Test Provider</button>
+            </div>
+            <div id="provider-status" class="status-message"></div>
+        </section>
+
+        <!-- Extraction Form -->
+        <section class="extraction-section">
+            <h2>Data Extraction</h2>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('url')">URL</button>
+                <button class="tab" onclick="switchTab('text')">Text</button>
+                <button class="tab" onclick="switchTab('html')">HTML</button>
+            </div>
+
+            <div id="tab-url" class="tab-content active">
+                <div class="form-group">
+                    <label for="url-input">URL to extract from:</label>
+                    <input type="url" id="url-input" placeholder="https://example.com" class="full-width">
+                </div>
+            </div>
+
+            <div id="tab-text" class="tab-content">
+                <div class="form-group">
+                    <label for="text-input">Text content:</label>
+                    <textarea id="text-input" rows="6" placeholder="Paste text content here..." class="full-width"></textarea>
+                </div>
+            </div>
+
+            <div id="tab-html" class="tab-content">
+                <div class="form-group">
+                    <label for="html-input">HTML content:</label>
+                    <textarea id="html-input" rows="6" placeholder="Paste HTML content here..." class="full-width"></textarea>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="schema-input">Extraction Schema (JSON):</label>
+                <textarea id="schema-input" rows="8" class="full-width">{
+  "title": {"type": "string", "description": "Page title"},
+  "summary": {"type": "string", "description": "Brief summary"},
+  "main_topics": {"type": "array", "description": "Main topics"},
+  "key_facts": {"type": "array", "description": "Key facts"}
+}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="instructions-input">Instructions (optional):</label>
+                <textarea id="instructions-input" rows="2" placeholder="Additional extraction instructions..." class="full-width"></textarea>
+            </div>
+
+            <button onclick="performExtraction()" class="btn btn-primary btn-large">
+                Extract Data
+            </button>
+        </section>
+
+        <!-- Results -->
+        <section class="results-section">
+            <h2>Results</h2>
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <span>Extracting data...</span>
+            </div>
+            <pre id="results" class="results-output">Results will appear here...</pre>
+        </section>
+
+        <!-- Example Schemas -->
+        <section class="examples-section">
+            <h2>Example Schemas</h2>
+            <div class="schema-examples">
+                <button onclick="loadExample('business')" class="btn btn-outline">Business Info</button>
+                <button onclick="loadExample('article')" class="btn btn-outline">Article</button>
+                <button onclick="loadExample('product')" class="btn btn-outline">Product</button>
+                <button onclick="loadExample('contact')" class="btn btn-outline">Contact Info</button>
+            </div>
+        </section>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
