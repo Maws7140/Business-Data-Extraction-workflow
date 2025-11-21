@@ -11,6 +11,24 @@ A Firecrawl-style LLM data extraction tool that allows you to extract structured
 - **Web UI**: User-friendly interface for extraction tasks
 - **CLI Tool**: Command-line interface for automation
 
+## Quick Start - Web UI
+
+The easiest way to get started is with the Web UI:
+
+### Linux/Mac
+```bash
+./start-ui.sh
+```
+
+### Windows
+```bash
+start-ui.bat
+```
+
+Then open **http://localhost:8000** in your browser!
+
+**See [WEB_UI_GUIDE.md](WEB_UI_GUIDE.md) for complete Web UI documentation.**
+
 ## Installation
 
 1. Clone the repository:
@@ -116,14 +134,37 @@ python -m src.cli.main serve --host 0.0.0.0 --port 8080
 
 ## Web UI
 
-Start the web server and open http://localhost:8000 in your browser.
+Start the web server:
+```bash
+python -m src.cli.main serve
+# Or use the startup script: ./start-ui.sh
+```
 
-### Features:
+Then open **http://localhost:8000** in your browser.
+
+### Web UI Features:
 - **Provider Selection**: Switch between providers using the dropdown
-- **Model Configuration**: Specify custom models
-- **Multiple Input Types**: URL, raw text, or HTML
+- **Model Configuration**: Specify custom models for each provider
+- **Multiple Input Types**: Extract from URL, raw text, or HTML
 - **Schema Editor**: Define extraction schemas with JSON
-- **Example Templates**: Pre-built schemas for common use cases
+- **Example Templates**: Pre-built schemas for business, articles, products, contacts
+- **Live Testing**: Test provider connections before extraction
+- **Real-time Results**: View extracted data with syntax highlighting
+
+**📖 Complete guide:** [WEB_UI_GUIDE.md](WEB_UI_GUIDE.md)
+
+### Web UI Screenshots
+
+**Provider Configuration:**
+- Select from 4 AI providers (OpenAI, Anthropic, Google, Ollama)
+- Configure custom models
+- Test connection with one click
+
+**Data Extraction:**
+- Enter URL or paste content
+- Define JSON schema for structured extraction
+- Add optional instructions
+- View results in formatted JSON
 
 ## API Endpoints
 
